@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gsj.rediswatch.mapper.PrizeDetailMapper">
+  <resultMap id="BaseResultMap" type="com.gsj.rediswatch.model.PrizeDetail">
+    <result column="prize_id" jdbcType="BIGINT" property="prizeId" />
+    <result column="prize_name" jdbcType="VARCHAR" property="prizeName" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="prize_amount" jdbcType="INTEGER" property="prizeAmount" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+  </resultMap>
+  <insert id="insert" parameterType="com.gsj.rediswatch.model.PrizeDetail">
+    insert into prize_detail (prize_id, prize_name, create_time, 
+      prize_amount, type)
+    values (#{prizeId,jdbcType=BIGINT}, #{prizeName,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{prizeAmount,jdbcType=INTEGER}, #{type,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.gsj.rediswatch.model.PrizeDetail">
+    insert into prize_detail
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="prizeId != null">
+        prize_id,
+      </if>
+      <if test="prizeName != null">
+        prize_name,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="prizeAmount != null">
+        prize_amount,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="prizeId != null">
+        #{prizeId,jdbcType=BIGINT},
+      </if>
+      <if test="prizeName != null">
+        #{prizeName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="prizeAmount != null">
+        #{prizeAmount,jdbcType=INTEGER},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="update">
+    UPDATE  prize_detail
+    SET prize_amount = prize_amount -1
+    WHERE  prize_amount>0 AND  prize_id=1
+  </update>
+</mapper>

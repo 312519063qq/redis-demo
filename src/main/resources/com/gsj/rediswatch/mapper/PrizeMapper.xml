@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gsj.rediswatch.mapper.PrizeMapper">
+  <resultMap id="BaseResultMap" type="com.gsj.rediswatch.model.Prize">
+    <result column="id" jdbcType="BIGINT" property="id" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="prize_id" jdbcType="BIGINT" property="prizeId" />
+    <result column="is_win" jdbcType="BIT" property="isWin" />
+    <result column="platform" jdbcType="BIT" property="platform" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="recipients_address" jdbcType="VARCHAR" property="recipientsAddress" />
+    <result column="recipients" jdbcType="VARCHAR" property="recipients" />
+    <result column="recipients_phone" jdbcType="VARCHAR" property="recipientsPhone" />
+    <result column="discount_code" jdbcType="VARCHAR" property="discountCode" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+  </resultMap>
+  <insert id="insert" parameterType="com.gsj.rediswatch.model.Prize">
+    insert into prize (id, user_id, prize_id, 
+      is_win, platform, create_time, 
+      recipients_address, recipients, recipients_phone, 
+      discount_code, type)
+    values (#{id,jdbcType=BIGINT}, #{userId,jdbcType=VARCHAR}, #{prizeId,jdbcType=BIGINT}, 
+      #{isWin,jdbcType=BIT}, #{platform,jdbcType=BIT}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{recipientsAddress,jdbcType=VARCHAR}, #{recipients,jdbcType=VARCHAR}, #{recipientsPhone,jdbcType=VARCHAR}, 
+      #{discountCode,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.gsj.rediswatch.model.Prize">
+    insert into prize
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="prizeId != null">
+        prize_id,
+      </if>
+      <if test="isWin != null">
+        is_win,
+      </if>
+      <if test="platform != null">
+        platform,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="recipientsAddress != null">
+        recipients_address,
+      </if>
+      <if test="recipients != null">
+        recipients,
+      </if>
+      <if test="recipientsPhone != null">
+        recipients_phone,
+      </if>
+      <if test="discountCode != null">
+        discount_code,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="prizeId != null">
+        #{prizeId,jdbcType=BIGINT},
+      </if>
+      <if test="isWin != null">
+        #{isWin,jdbcType=BIT},
+      </if>
+      <if test="platform != null">
+        #{platform,jdbcType=BIT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="recipientsAddress != null">
+        #{recipientsAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="recipients != null">
+        #{recipients,jdbcType=VARCHAR},
+      </if>
+      <if test="recipientsPhone != null">
+        #{recipientsPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="discountCode != null">
+        #{discountCode,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>
