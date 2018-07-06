@@ -1,8 +1,14 @@
 package com.gsj.rediswatch.controller;
 
 import com.gsj.rediswatch.model.Persion;
+import com.gsj.rediswatch.utils.common.HttpClientUtil;
+import com.sun.corba.se.spi.orbutil.threadpool.ThreadPool;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -161,18 +167,48 @@ public class Test {
 //                return persion.getFirstName();
 //            }
 //        }).collect(joining(" ; "));
-        List<String> idStr = new ArrayList<>();
-        idStr.add("1");
-        idStr.add("2");
-        idStr.add("3");
-        idStr.add("4");
-        idStr.add("5");
-        idStr.stream().map(Long::valueOf).collect(toList()).forEach((id)->{
-            System.out.println("idStr = " + id);
-        });
+//        List<String> idStr = new ArrayList<>();
+//        idStr.add("1");
+//        idStr.add("2");
+//        idStr.add("3");
+//        idStr.add("4");
+//        idStr.add("5");
+//        idStr.stream().map(Long::valueOf).collect(toList()).forEach((id)->{
+//            System.out.println("idStr = " + id);
+//        });
+//        Map<String,String> map = new HashMap<>();
+//        map.put("1","1");
+//        map.put("2","2");
+//        map.put("3","3");
+//        map.put("4","4");
+//        map.put("5","5");
+//        map.put("6","6");
+//
+//        Set<String> keys = map.keySet();
+//        for (String key: keys) {
+//            System.out.println(key);
+//        }
+        String url ="http://localhost:8888/test-redis/test/kill";
+        ExecutorService executor = Executors.newFixedThreadPool(20);
+        for (int i = 0; i < 10000; i++) {// 测试一万人同时访问
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    kill(url);
+                }
+            });
+        }
+        executor.shutdown();
 
 
+    }
+    private static void kill(String url){
 
+        try {
+            HttpClientUtil.sendHttpGetRequest(url);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 

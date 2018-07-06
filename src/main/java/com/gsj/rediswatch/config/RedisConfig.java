@@ -31,7 +31,7 @@ public class RedisConfig {
     }};
     private List<PatternTopic> patternTopics=new ArrayList<PatternTopic>(){
         {
-            add(new PatternTopic("TOPIC"));
+            add(new PatternTopic("topic"));
         }
     };
 

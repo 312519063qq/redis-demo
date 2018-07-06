@@ -55,15 +55,15 @@ public class RedisClient {
                 return redisOperations.exec();
             }
         };
-        ListOperations<String, String> listOperations =  redisTemplate.opsForList();
-        redisTemplate.execute(new RedisCallback(){
-
-            @Nullable
-            @Override
-            public Object doInRedis(RedisConnection redisConnection) throws DataAccessException {
-                return null;
-            }
-        });
+//        ListOperations<String, String> listOperations =  redisTemplate.opsForList();
+//        redisTemplate.execute(new RedisCallback(){
+//
+//            @Nullable
+//            @Override
+//            public Object doInRedis(RedisConnection redisConnection) throws DataAccessException {
+//                return null;
+//            }
+//        });
         return  redisTemplate.execute(sessionCallback);
     }
 

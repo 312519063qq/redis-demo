@@ -27,9 +27,22 @@ public class PrizeController {
         return  prizeService.prize(Math.random());
     }
 
+    @RequestMapping("/watch")
+    @ResponseBody
+    public AppJsonObj watch(){
+        return  prizeService.watch();
+    }
+
     @RequestMapping("/mq")
     @ResponseBody
     public AppJsonObj mq(String topic){
         return  prizeService.mq(topic, UUID.randomUUID().toString());
     }
+
+    @RequestMapping("/kill")
+    @ResponseBody
+    public AppJsonObj kill() throws InterruptedException {
+        return  prizeService.kill();
+    }
+
 }

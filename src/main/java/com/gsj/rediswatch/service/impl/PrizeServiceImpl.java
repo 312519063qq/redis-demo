@@ -24,11 +24,11 @@ public class PrizeServiceImpl implements PrizeService {
     @Autowired
     private RedisClient redisClient;
 
-    @Autowired
-    private PrizeDetailMapper prizeDetailMapper;
-
-    @Autowired
-    private PrizeMapper prizeMapper;
+//    @Autowired
+//    private PrizeDetailMapper prizeDetailMapper;
+//
+//    @Autowired
+//    private PrizeMapper prizeMapper;
 
     @Override
     public AppJsonObj prize(double weight) {
@@ -36,28 +36,46 @@ public class PrizeServiceImpl implements PrizeService {
         Map<String,String> msg = new HashMap<>();
         Integer prizeNum = Integer.valueOf(redisClient.get("prizeNum"));
         if(prizeNum>0){
+            redisTemplate.watch("prizeNum");
             double random = Math.random();
-            if(weight<random){
+//            if(weight<random){
+                try {
+                    System.out.println("睡眠10秒");
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 redisClient.multi();
+                System.out.println("开始redis");
                 Object o =  redisClient.execForNum("prizeNum",-1);
+                System.out.println("Object："+o==null);
                 if(o!=null){
-                    prizeDetailMapper.update();
+//                    prizeDetailMapper.update();
                     Prize prize = new Prize();
                     prize.setCreateTime(new Date());
                     prize.setPlatform(Integer.valueOf(redisClient.get("prizeNum")));
-                    prizeMapper.insert(prize);
+//                    prizeMapper.insert(prize);
                     msg.put("message","中奖");
                 }else{
                     msg.put("message","未中奖");
                 }
-            }else{
-                msg.put("message","未中奖");
-            }
+//            }else{
+//                msg.put("message","未中奖");
+//            }
         }else{
             msg.put("message","奖品已送完！！！！！！！！！");
         }
         obj.setMeta(msg);
         return obj;
+    }
+
+    @Override
+    public AppJsonObj watch() {
+        AppJsonObj obj = new AppJsonObj();
+        Object o =  redisClient.execForNum("killKey",-1);
+        System.out.println("Object："+o==null);
+        obj.setData(redisClient.get("killKey"));
+         return obj;
     }
 
     @Override
@@ -74,5 +92,37 @@ public class PrizeServiceImpl implements PrizeService {
         }
         obj.setData(l1);
         return obj;
+    }
+
+    @Override
+    public AppJsonObj kill() throws InterruptedException {
+        AppJsonObj obj = new AppJsonObj();
+        Map<String,String> msg = new HashMap<>();
+        redisTemplate.watch("killKey");
+        Integer overNum = Integer.valueOf(redisClient.get("killKey"));
+        if(overNum<=0){
+            msg.put("message","商品已卖完！");
+            obj.setMeta(msg);
+            return obj;
+        }
+        System.out.println("抢购前---------------->num="+overNum);
+//        Thread.sleep(10000);
+        Object o1  = redisClient.execForNum("killKey",-1);
+        System.out.println("在监听后  事物前改动 watched key值---------------->num="+redisClient.get("killKey"));
+        redisClient.multi();
+        Object o  = redisClient.execForNum("killKey",-1);
+        if(o==null){
+            System.out.println("抢购失败--->num="+redisClient.get("killKey"));
+            msg.put("num",redisClient.get("killKey"));
+            msg.put("message","抢购失败！");
+            obj.setMeta(msg);
+            return obj;
+        }else{
+            System.out.println("抢购成功----->>>>>>>>-->num"+redisClient.get("killKey"));
+            msg.put("message","抢购成功！");
+            msg.put("num",redisClient.get("killKey"));
+            obj.setMeta(msg);
+            return obj;
+        }
     }
 }
