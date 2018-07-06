@@ -7,7 +7,11 @@ import com.gsj.rediswatch.redis.RedisClient;
 import com.gsj.rediswatch.service.PrizeService;
 import com.gsj.rediswatch.utils.common.AppJsonObj;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SessionCallback;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -24,57 +28,16 @@ public class PrizeServiceImpl implements PrizeService {
     @Autowired
     private RedisClient redisClient;
 
-//    @Autowired
-//    private PrizeDetailMapper prizeDetailMapper;
-//
-//    @Autowired
-//    private PrizeMapper prizeMapper;
+    private static  final String WATCH_KEY="watchKey";
+
+
 
     @Override
-    public AppJsonObj prize(double weight) {
+    public AppJsonObj updateWatched() {
         AppJsonObj obj = new AppJsonObj();
-        Map<String,String> msg = new HashMap<>();
-        Integer prizeNum = Integer.valueOf(redisClient.get("prizeNum"));
-        if(prizeNum>0){
-            redisTemplate.watch("prizeNum");
-            double random = Math.random();
-//            if(weight<random){
-                try {
-                    System.out.println("睡眠10秒");
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                redisClient.multi();
-                System.out.println("开始redis");
-                Object o =  redisClient.execForNum("prizeNum",-1);
-                System.out.println("Object："+o==null);
-                if(o!=null){
-//                    prizeDetailMapper.update();
-                    Prize prize = new Prize();
-                    prize.setCreateTime(new Date());
-                    prize.setPlatform(Integer.valueOf(redisClient.get("prizeNum")));
-//                    prizeMapper.insert(prize);
-                    msg.put("message","中奖");
-                }else{
-                    msg.put("message","未中奖");
-                }
-//            }else{
-//                msg.put("message","未中奖");
-//            }
-        }else{
-            msg.put("message","奖品已送完！！！！！！！！！");
-        }
-        obj.setMeta(msg);
-        return obj;
-    }
-
-    @Override
-    public AppJsonObj watch() {
-        AppJsonObj obj = new AppJsonObj();
-        Object o =  redisClient.execForNum("killKey",-1);
+        Object o =  redisClient.execForNum(WATCH_KEY,-1);
         System.out.println("Object："+o==null);
-        obj.setData(redisClient.get("killKey"));
+        obj.setData(redisClient.get(WATCH_KEY));
          return obj;
     }
 
@@ -98,29 +61,39 @@ public class PrizeServiceImpl implements PrizeService {
     public AppJsonObj kill() throws InterruptedException {
         AppJsonObj obj = new AppJsonObj();
         Map<String,String> msg = new HashMap<>();
-        redisTemplate.watch("killKey");
-        Integer overNum = Integer.valueOf(redisClient.get("killKey"));
+
+        Integer overNum = Integer.valueOf(redisClient.get(WATCH_KEY));
         if(overNum<=0){
             msg.put("message","商品已卖完！");
             obj.setMeta(msg);
             return obj;
         }
-        System.out.println("抢购前---------------->num="+overNum);
-//        Thread.sleep(10000);
-        Object o1  = redisClient.execForNum("killKey",-1);
-        System.out.println("在监听后  事物前改动 watched key值---------------->num="+redisClient.get("killKey"));
-        redisClient.multi();
-        Object o  = redisClient.execForNum("killKey",-1);
-        if(o==null){
-            System.out.println("抢购失败--->num="+redisClient.get("killKey"));
-            msg.put("num",redisClient.get("killKey"));
+        List<Object> o = (List<Object>) redisTemplate.execute(new SessionCallback() {
+            @Nullable
+            @Override
+            public Object execute(RedisOperations redisOperations) throws DataAccessException {
+                redisOperations.watch(WATCH_KEY);
+                redisOperations.multi();
+                redisOperations.opsForValue().increment(WATCH_KEY,-1);
+//                try {
+//                    System.out.println("休眠  模拟事物没执行之前修改 watched数据 调 ");
+//                    Thread.sleep(10000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+                return redisOperations.exec();
+            }
+        });
+        if(o==null || o.size()==0){
+            System.out.println("抢购失败--->num="+redisClient.get(WATCH_KEY));
+            msg.put("num",redisClient.get(WATCH_KEY));
             msg.put("message","抢购失败！");
             obj.setMeta(msg);
             return obj;
         }else{
-            System.out.println("抢购成功----->>>>>>>>-->num"+redisClient.get("killKey"));
+            System.out.println("抢购成功----->>>>>>>>-->num"+redisClient.get(WATCH_KEY));
             msg.put("message","抢购成功！");
-            msg.put("num",redisClient.get("killKey"));
+            msg.put("num",redisClient.get(WATCH_KEY));
             obj.setMeta(msg);
             return obj;
         }

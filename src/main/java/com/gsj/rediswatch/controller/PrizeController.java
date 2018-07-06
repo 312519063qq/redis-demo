@@ -21,16 +21,16 @@ public class PrizeController {
     @Autowired
     private PrizeService prizeService;
 
-    @RequestMapping("/prize")
-    @ResponseBody
-    public AppJsonObj prize(){
-        return  prizeService.prize(Math.random());
-    }
+//    @RequestMapping("/prize")
+//    @ResponseBody
+//    public AppJsonObj prize(){
+//        return  prizeService.prize(Math.random());
+//    }
 
     @RequestMapping("/watch")
     @ResponseBody
     public AppJsonObj watch(){
-        return  prizeService.watch();
+        return  prizeService.updateWatched();
     }
 
     @RequestMapping("/mq")
